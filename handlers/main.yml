@@ -1,0 +1,11 @@
+---
+# handlers file for while_true_do.srv_postgresql
+
+- name: Restart postgresql
+  service:
+    name: "{{ wtd_srv_postgresql_service }}"
+    state: "restarted"
+  become: true
+  tags:
+    - postgresql
+    - service

@@ -1,0 +1,36 @@
+---
+# meta file for while_true_do.srv_postgresql
+
+galaxy_info:
+  role_name: srv_postgresql
+  author: while-true-do.io
+  description: An Ansible Role to install and configure postgresql.
+  license: BSD
+
+  min_ansible_version: 2.7
+
+  # Supported platforms: https://galaxy.ansible.com/api/v1/platforms/
+  # Please also maintain
+  # - molecule/default/molecule.yml
+  # - molecule/default/tests/*
+  # - .travis.yml
+  platforms:
+    - name: EL
+      versions:
+        - 7
+
+    - name: Fedora
+      versions:
+        - 29
+        - 30
+
+  # Some very common tags are:
+  # system, virtualization, development, monitoring, packaging, container
+  # configuration, cloud, security
+  galaxy_tags:
+    - postgresql
+    - configuration
+    - system
+    - database
+
+dependencies: []

@@ -1,0 +1,105 @@
+---
+# tasks file for while_true_do.srv_postgresql
+
+- name: Gather package facts
+  package_facts:
+    manager: auto
+  tags:
+    - postgresql
+    - facts
+    - package
+
+- name: Manage postgresql Packages
+  package:
+    name: "{{ wtd_srv_postgresql_package }}"
+    state: "{{ wtd_srv_postgresql_package_state }}"
+  become: true
+  tags:
+    - postgresql
+    - package
+
+- name: Manage postgresql User
+  user:
+    name: "{{ wtd_srv_postgresql_user.name }}"
+    group: "{{ wtd_srv_postgresql_user.group|default(omit) }}"
+    password: "{{ wtd_srv_postgresql_user.password|default(omit) }}"
+    system: true
+  become: true
+  tags:
+    - postgresql
+    - user
+    - configuration
+
+- name: Manage postgresql Directory
+  file:
+    path: "{{ wtd_srv_postgresql_conf_data }}"
+    owner: "{{ wtd_srv_postgresql_user.name }}"
+    group: "{{ wtd_srv_postgresql_user.group }}"
+    state: "directory"
+    mode: 0700
+  become: true
+  tags:
+    - postgresql
+    - configuration
+
+- name: Check postgresql Initialization
+  stat:
+    path: "{{ wtd_srv_postgresql_conf_data }}/PG_VERSION"
+  become: true
+  register: wtd_postgres_version
+  tags:
+    - postgresql
+    - configuration
+
+- name: Initialize postgresql
+  command: "/usr/bin/initdb -U {{ wtd_srv_postgresql_user.name }} -D {{ wtd_srv_postgresql_conf_data }}"
+  become: true
+  become_user: "{{ wtd_srv_postgresql_user.name }}"
+  when:
+    - not wtd_postgres_version.stat.exists
+  tags:
+    - postgresql
+    - configuration
+
+- name: Manage postgresql Access (HBA)
+  template:
+    src: "pg_hba.conf.j2"
+    dest: "{{ wtd_srv_postgresql_conf_data }}/pg_hba.conf"
+    owner: "{{ wtd_srv_postgresql_user.name }}"
+    group: "{{ wtd_srv_postgresql_user.group }}"
+    mode: "0700"
+  become: true
+  notify: Restart postgresql
+  tags:
+    - postgresql
+    - configuration
+    - user
+
+- name: Manage postgresql Service
+  service:
+    name: "{{ wtd_srv_postgresql_service }}"
+    state: "{{ wtd_srv_postgresql_service_state }}"
+    enabled: "{{ wtd_srv_postgresql_service_enabled }}"
+  become: true
+  when:
+    - wtd_srv_postgresql_package_state != "absent"
+  tags:
+    - postgresql
+    - service
+
+- name: Manage postgresql FW Service
+  firewalld:
+    service: "{{ wtd_srv_postgresql_fw_service }}"
+    state: "{{ wtd_srv_postgresql_fw_state }}"
+    zone: "{{ wtd_srv_postgresql_fw_zone }}"
+    immediate: true
+    permanent: true
+  become: true
+  when:
+    - wtd_srv_postgresql_fw_mgmt
+    - '"firewalld" in packages'
+  tags:
+    - postgresql
+    - configuration
+    - security
+    - firewall

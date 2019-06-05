@@ -1,0 +1,43 @@
+---
+# defaults file for while_true_do.srv_postgresql
+
+## Package Management
+wtd_srv_postgresql_package:
+  - postgresql-server
+  - postgresql-contrib
+# State can be present|latest|absent
+wtd_srv_postgresql_package_state: "present"
+
+## User Management
+# This user will also be ths postgres super user
+wtd_srv_postgresql_user:
+  name: "postgres"
+  group: "postgres"
+
+## Configuration Management
+wtd_srv_postgresql_conf_data: "/var/lib/pgsql/data"
+# For local connections via postgres_user defaults will be set
+wtd_srv_postgresql_conf_hba: []
+# - type: "local"
+#   database: "all"
+#   user: "all"
+#   method: "peer"
+# - type: "host"
+#   database: "somedatabase"
+#   user: "someuser"
+#   address: "192.168.10.0/24"
+#   method: "ident"
+
+## Service Management
+wtd_srv_postgresql_service: "postgresql"
+# State can be started|stopped
+wtd_srv_postgresql_service_state: "started"
+wtd_srv_postgresql_service_enabled: true
+
+## Firewalld Management
+wtd_srv_postgresql_fw_mgmt: true
+wtd_srv_postgresql_fw_service: "postgresql"
+# State can be enabled|disabled
+wtd_srv_postgresql_fw_state: "enabled"
+# Zone can be according to defined zones on your machine.
+wtd_srv_postgresql_fw_zone: "public"
